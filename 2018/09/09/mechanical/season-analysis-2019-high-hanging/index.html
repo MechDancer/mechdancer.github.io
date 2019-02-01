@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+    
+    <title>FTC 2019赛季任务分析及建议 高挂部分 | MechDancer - 机械舞者</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="任务分析今天凌晨发布了 FTC 201 9赛季的新主题，大家从规则中不难发现高挂部分在本赛季中的分数比重相当大，作为一个退役老咸鱼，我在这里就为大家进行一下新赛季中高挂部分是分析及我对这部分机构的设计建议。根据规则，在比赛伊始机器人可以选择挂在着陆器上(至于为什么要挂在上面启动，那当然是为了获得加分2333)，考虑到在一开始要进行30秒的自动阶段，这就要求机器在降下之后要有一个稳定精确的下降落点，">
+<meta name="keywords" content="任务分析,设计建议">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FTC 2019赛季任务分析及建议 高挂部分">
+<meta property="og:url" content="http://mechdancer.org/2018/09/09/mechanical/season-analysis-2019-high-hanging/index.html">
+<meta property="og:site_name" content="MechDancer - 机械舞者">
+<meta property="og:description" content="任务分析今天凌晨发布了 FTC 201 9赛季的新主题，大家从规则中不难发现高挂部分在本赛季中的分数比重相当大，作为一个退役老咸鱼，我在这里就为大家进行一下新赛季中高挂部分是分析及我对这部分机构的设计建议。根据规则，在比赛伊始机器人可以选择挂在着陆器上(至于为什么要挂在上面启动，那当然是为了获得加分2333)，考虑到在一开始要进行30秒的自动阶段，这就要求机器在降下之后要有一个稳定精确的下降落点，">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://mechdancer.org/images/season-logo.jpg">
+<meta property="og:updated_time" content="2019-02-01T03:39:37.045Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="FTC 2019赛季任务分析及建议 高挂部分">
+<meta name="twitter:description" content="任务分析今天凌晨发布了 FTC 201 9赛季的新主题，大家从规则中不难发现高挂部分在本赛季中的分数比重相当大，作为一个退役老咸鱼，我在这里就为大家进行一下新赛季中高挂部分是分析及我对这部分机构的设计建议。根据规则，在比赛伊始机器人可以选择挂在着陆器上(至于为什么要挂在上面启动，那当然是为了获得加分2333)，考虑到在一开始要进行30秒的自动阶段，这就要求机器在降下之后要有一个稳定精确的下降落点，">
+<meta name="twitter:image" content="http://mechdancer.org/images/season-logo.jpg">
+    
+
+    
+
+    
+        <link rel="icon" href="/css/images/favicon.png">
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-brands.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-solid.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+        <link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+    
+    
+    
+    
+
+
+</head>
+</html>
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">MechDancer - 机械舞者</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">主页</a>
+                
+                    <a class="main-nav-link" href="/archives">归档</a>
+                
+                    <a class="main-nav-link" href="/categories">分类</a>
+                
+                    <a class="main-nav-link" href="/tags">标签</a>
+                
+                    <a class="main-nav-link" href="/about">关于</a>
+                
+            </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索">
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么...">
+            <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">主页</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">归档</a></td>
+                
+                    <td><a class="main-nav-link" href="/categories">分类</a></td>
+                
+                    <td><a class="main-nav-link" href="/tags">标签</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">关于</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索">
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+            <section id="main"><article id="post-mechanical/season-analysis-2019-high-hanging" class="article article-type-post" itemscope="" itemprop="blogPost">
+
+    <!-- <script>
+        function scalingBanner(obj){
+            var $this=obj
+
+            var imgWidth=$this.width();
+            var imgHeight=$this.height();
+        
+            var result=scalingImage(imgWidth,imgHeight,300,300)
+            
+            $this.attr('width',result.width)
+            $this.attr('height',result.height)
+        }
+
+        function scalingImage(imgWidth, imgHeight, containerWidth, containerHeight) {
+            var containerRatio = containerWidth / containerHeight;
+            var imgRatio = imgWidth / imgHeight;
+        
+            if (imgRatio > containerRatio) {
+                imgWidth = containerWidth;
+                imgHeight = containerWidth / imgRatio;
+            } else if (imgRatio < containerRatio) {
+                imgHeight = containerHeight;
+                imgWidth = containerHeight * imgRatio;
+            } else {
+                imgWidth = containerWidth;
+                imgHeight = containerHeight;
+            }
+        
+            return { width: imgWidth, height: imgHeight };
+        }
+
+    </script>
+
+    <div style="display:none">
+        <img src="/../images/season-logo.jpg" width="300" height="300">
+        <img src="/../images/season-logo.jpg" onload="scalingBanner(this)" width="" height="">
+    </div> 
+ -->
+    <div class="article-inner">
+        
+            
+	
+		<img src="/../images/season-logo.jpg" class="article-banner">
+	
+
+
+
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            FTC 2019赛季任务分析及建议 高挂部分
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2018/09/09/mechanical/season-analysis-2019-high-hanging/">
+            <time datetime="2018-09-09T18:00:00.000Z" itemprop="datePublished">2018-09-09</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/技术文档（机械）/">技术文档（机械）</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/任务分析/">任务分析</a>, <a class="tag-link" href="/tags/设计建议/">设计建议</a>
+    </div>
+
+                        
+    <div>
+        <i class="fas fa-pencil-alt"></i>
+        金斯基
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="任务分析"><a href="#任务分析" class="headerlink" title="任务分析"></a>任务分析</h2><p>今天凌晨发布了 FTC 201 9赛季的新主题，大家从规则中不难发现高挂部分在本赛季中的分数比重相当大，作为一个退役老咸鱼，我在这里就为大家进行一下新赛季中高挂部分是分析及我对这部分机构的设计建议。根据规则，在比赛伊始机器人可以选择挂在着陆器上(至于为什么要挂在上面启动，那当然是为了获得加分2333)，考虑到在一开始要进行30秒的自动阶段，这就要求机器在降下之后要有一个稳定精确的下降落点，若机器在悬挂过程中就晃晃悠悠，下降落点散布又比较大，那对自动程序必然会造成一定的障碍。在比赛的最后30秒，如何快速将“钩子”固定在着陆器上则是需要关注的重点，这就要求机械上在展开后整体有一定的刚度，不会随意晃动。</p>
+<h2 id="设计建议"><a href="#设计建议" class="headerlink" title="设计建议"></a>设计建议</h2><ol>
+<li><p>将高挂部分设计为一个模块，以一个可上下滑动的框架作为伸缩部分为主体(类似17年抱大球双滑轨的那种)，只不过这次不需要那么多级滑轨。当然也可使用铝方管代替滑轨，可实现一定的减重，但安装较为麻烦。</p>
+</li>
+<li><p>关于“钩子”，从规则中可知机器人需要固定在一竖直放置的U型支架上。同样的为了让机器人挂起后不易晃动，我认为设计机器的挂钩最好不要使用普通的弧形挂钩，而通过一在U型框架上的可动插销代替“钩子”，并在升降框架上安装两支点，实现框架较为稳定的固定。这样设计的优点主要就是升降过程中可让机器保持稳定，而且在“固定”与“放开”两个状态间迅速切换，便于机器在比赛开始时的落地，且能有一个较为精确的落点，方便自动程序的运行。如果担心这样在对位时仍有困难，可在卡扣两侧加装导向机构作为辅助机械定位装置，可进一步降低对位难度。</p>
+</li>
+<li><p>关于将机器抬升的传动机构，我认为线轴拉线、蜗轮蜗杆+小正齿轮+齿条、丝杠+丝杠法兰 的几种方式都还是比较靠谱的，其中齿条结构和丝杠结构的反馈更直接，升降也更精确，但是质量比较大。具体结构的选择还需要根据你们的想法及设计进行选择，这里就不进行过多说明。</p>
+</li>
+</ol>
+<h2 id="建议原因"><a href="#建议原因" class="headerlink" title="建议原因"></a>建议原因</h2><ol>
+<li>我建议使用可升降的框架主要有两个原因，一是相比于使用机械臂降钩子挂上去，升降框架的整体刚度更大，在机器运动时不宜晃动，从而可以使机器是升降点不会偏差过大，精度较高，便于自动程序的运行。二是整体框架的稳定降低了在最后30s操作手对位时的难度，从而提高了高挂的成功率。</li>
+<li><p>你们可能会怀疑滑轨的强度，担心使用滑轨将机器拉起来会把滑轨拉坏，但实际上，一切在FTC中造成损坏的原因都是由于使用方式不正确而导致的。在使用滑轨时，最需要注意的一点就是滑轨的受力方向是与滑轨的短面(没有安装孔的那面)垂直的，而不是很多人所使用的长面(有安装孔的那面)。一根正常抽屉轨一般在使用正确的情况下可承受25-30kg的重量，尺寸较大的工业滑轨大多数都可承受50-70kg，所以在使用正确的情况下，完全不需要为滑轨的强度而担忧。</p>
+</li>
+<li><p>由于蜗轮蜗杆有自锁性，这就使得它十分适合用作高挂结构的传动系统。今年在自动阶段开始时机器人是挂在支架上的，若单纯的用程序实现闭位置环，从而将电机锁死的话不但对电机的负载较大，而且会对电机的寿命有一些不利影响。相比之下设计一个机械结构实现机械锁死又较为复杂，这种情况下使用蜗轮蜗杆不但可以简化设计，更可以利用其自身性质实现机器的锁定。</p>
+</li>
+</ol>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+    <div class="a2a_kit a2a_default_style">
+    <a class="a2a_dd" href="https://www.addtoany.com/share">Share</a>
+    <span class="a2a_divider"></span>
+    <!-- <a class="a2a_button_facebook"></a>
+    <a class="a2a_button_twitter"></a>
+    <a class="a2a_button_google_plus"></a>
+    <a class="a2a_button_pinterest"></a>
+    <a class="a2a_button_tumblr"></a> -->
+    <a class="a2a_button_wechat"></a>
+    <a class="a2a_button_sina_weibo"></a>
+</div>
+<script type="text/javascript" src="//static.addtoany.com/menu/page.js"></script>
+<style>
+    .a2a_menu {
+        border-radius: 4px;
+    }
+    .a2a_menu a {
+        margin: 2px 0;
+        font-size: 14px;
+        line-height: 16px;
+        border-radius: 4px;
+        color: inherit !important;
+        font-family: 'Microsoft Yahei';
+    }
+    #a2apage_dropdown {
+        margin: 10px 0;
+    }
+    .a2a_mini_services {
+        padding: 10px;
+    }
+    a.a2a_i,
+    i.a2a_i {
+        width: 122px;
+        line-height: 16px;
+    }
+    a.a2a_i .a2a_svg,
+    a.a2a_more .a2a_svg {
+        width: 16px;
+        height: 16px;
+        line-height: 16px;
+        vertical-align: top;
+        background-size: 16px;
+    }
+    a.a2a_i {
+        border: none !important;
+    }
+    a.a2a_menu_show_more_less {
+        margin: 0;
+        padding: 10px 0;
+        line-height: 16px;
+    }
+    .a2a_mini_services:after{content:".";display:block;height:0;clear:both;visibility:hidden}
+    .a2a_mini_services{*+height:1%;}
+</style>
+
+</div>
+
+            
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2018/09/12/programming/navigation.dwa/" id="article-nav-newer" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">上一篇</strong>
+            <div class="article-nav-title">
+                
+                    速度窗口法实现局部路径规划
+                
+            </div>
+        </a>
+    
+    
+        <a href="/2018/09/08/programming/statemachine/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">下一篇</strong>
+            <div class="article-nav-title">状态机——新的开端</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+
+</section>
+            
+                
+<aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="no-thumbnail">
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/8102/01/01/others/hello-world/" class="title">MechDancer Team 1329</a></p>
+                            <p class="item-date"><time datetime="8102-01-01T00:00:00.000Z" itemprop="datePublished">8102-01-01</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/技术文档（软件）/">技术文档（软件）</a></p>
+                            <p class="item-title"><a href="/2018/11/12/programming/scanning-digit-comment-DFA/" class="title">确定性有穷自动机实现单词、数字和注释扫描</a></p>
+                            <p class="item-date"><time datetime="2018-11-12T00:00:00.000Z" itemprop="datePublished">2018-11-12</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/简报-总结/">简报/总结</a></p>
+                            <p class="item-title"><a href="/2018/09/16/briefing/communication-defy-2018.09.16/" class="title">师大二附交流活动简报</a></p>
+                            <p class="item-date"><time datetime="2018-09-16T16:00:00.000Z" itemprop="datePublished">2018-09-16</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/技术文档（软件）/">技术文档（软件）</a></p>
+                            <p class="item-title"><a href="/2018/09/14/programming/navigation-interface/" class="title">规范导航器接口</a></p>
+                            <p class="item-date"><time datetime="2018-09-14T18:01:00.000Z" itemprop="datePublished">2018-09-14</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/技术文档（软件）/">技术文档（软件）</a></p>
+                            <p class="item-title"><a href="/2018/09/12/programming/statemachine-2/" class="title">状态机——(1)</a></p>
+                            <p class="item-date"><time datetime="2018-09-12T17:43:00.000Z" itemprop="datePublished">2018-09-12</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/技术文档（机械）/">技术文档（机械）</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术文档（软件）/">技术文档（软件）</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/简报-总结/">简报/总结</a><span class="category-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/8102/01/">一月 8102</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">九月 2018</a><span class="archive-list-count">6</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">标签</h3>
+        <div class="widget">
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/交流活动/">交流活动</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/任务分析/">任务分析</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/状态机/">状态机</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/编译原理/">编译原理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计建议/">设计建议</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/路径规划/">路径规划</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/造轮子/">造轮子</a><span class="tag-list-count">4</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">标签云</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/交流活动/" style="font-size: 10px;">交流活动</a> <a href="/tags/任务分析/" style="font-size: 13.33px;">任务分析</a> <a href="/tags/状态机/" style="font-size: 13.33px;">状态机</a> <a href="/tags/算法/" style="font-size: 16.67px;">算法</a> <a href="/tags/编译原理/" style="font-size: 10px;">编译原理</a> <a href="/tags/设计建议/" style="font-size: 10px;">设计建议</a> <a href="/tags/路径规划/" style="font-size: 13.33px;">路径规划</a> <a href="/tags/造轮子/" style="font-size: 20px;">造轮子</a>
+        </div>
+    </div>
+
+    
+    <div id="toTop" class="fas fa-angle-up"></div>
+</aside>
+
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2019 MechDancer<br>
+            <!-- Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="http://github.com/ppoffice">PPOffice</a> -->
+        </div>
+    </div>
+</footer>
+        
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+        <script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    
+    
+        <script type="text/x-mathjax-config">
+            MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] } });
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>

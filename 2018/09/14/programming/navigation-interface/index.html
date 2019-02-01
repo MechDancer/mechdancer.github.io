@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+    
+    <title>规范导航器接口 | MechDancer - 机械舞者</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="前言通过前一段时间实现的动态窗口法导航，我对导航模块也有了更深一层的认识。为了使软硬件异构的机器人都能使用导航模块，我抽象出了导航模块，以及可导航运动平台的共性，其实现即规范导航器接口。本文主要介绍导航器的模型和概念，并辅以少量演示代码。 下文中“导航”与“局部路径规划”是等价的，可互换。 概念以动态窗口法和定时弹带法为代表的一系列导航算法具有相同的运行过程，即预测→优化→控制。其中预测过程确定有">
+<meta name="keywords" content="算法,路径规划,造轮子">
+<meta property="og:type" content="article">
+<meta property="og:title" content="规范导航器接口">
+<meta property="og:url" content="http://mechdancer.org/2018/09/14/programming/navigation-interface/index.html">
+<meta property="og:site_name" content="MechDancer - 机械舞者">
+<meta property="og:description" content="前言通过前一段时间实现的动态窗口法导航，我对导航模块也有了更深一层的认识。为了使软硬件异构的机器人都能使用导航模块，我抽象出了导航模块，以及可导航运动平台的共性，其实现即规范导航器接口。本文主要介绍导航器的模型和概念，并辅以少量演示代码。 下文中“导航”与“局部路径规划”是等价的，可互换。 概念以动态窗口法和定时弹带法为代表的一系列导航算法具有相同的运行过程，即预测→优化→控制。其中预测过程确定有">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-02-01T03:39:37.045Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="规范导航器接口">
+<meta name="twitter:description" content="前言通过前一段时间实现的动态窗口法导航，我对导航模块也有了更深一层的认识。为了使软硬件异构的机器人都能使用导航模块，我抽象出了导航模块，以及可导航运动平台的共性，其实现即规范导航器接口。本文主要介绍导航器的模型和概念，并辅以少量演示代码。 下文中“导航”与“局部路径规划”是等价的，可互换。 概念以动态窗口法和定时弹带法为代表的一系列导航算法具有相同的运行过程，即预测→优化→控制。其中预测过程确定有">
+    
+
+    
+
+    
+        <link rel="icon" href="/css/images/favicon.png">
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-brands.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-solid.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+        <link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+    
+    
+    
+    
+
+
+</head>
+</html>
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">MechDancer - 机械舞者</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">主页</a>
+                
+                    <a class="main-nav-link" href="/archives">归档</a>
+                
+                    <a class="main-nav-link" href="/categories">分类</a>
+                
+                    <a class="main-nav-link" href="/tags">标签</a>
+                
+                    <a class="main-nav-link" href="/about">关于</a>
+                
+            </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索">
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么...">
+            <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">主页</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">归档</a></td>
+                
+                    <td><a class="main-nav-link" href="/categories">分类</a></td>
+                
+                    <td><a class="main-nav-link" href="/tags">标签</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">关于</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索">
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+            <section id="main"><article id="post-programming/navigation-interface" class="article article-type-post" itemscope="" itemprop="blogPost">
+
+    <!-- <script>
+        function scalingBanner(obj){
+            var $this=obj
+
+            var imgWidth=$this.width();
+            var imgHeight=$this.height();
+        
+            var result=scalingImage(imgWidth,imgHeight,300,300)
+            
+            $this.attr('width',result.width)
+            $this.attr('height',result.height)
+        }
+
+        function scalingImage(imgWidth, imgHeight, containerWidth, containerHeight) {
+            var containerRatio = containerWidth / containerHeight;
+            var imgRatio = imgWidth / imgHeight;
+        
+            if (imgRatio > containerRatio) {
+                imgWidth = containerWidth;
+                imgHeight = containerWidth / imgRatio;
+            } else if (imgRatio < containerRatio) {
+                imgHeight = containerHeight;
+                imgWidth = containerHeight * imgRatio;
+            } else {
+                imgWidth = containerWidth;
+                imgHeight = containerHeight;
+            }
+        
+            return { width: imgWidth, height: imgHeight };
+        }
+
+    </script>
+
+    <div style="display:none">
+        <img src="" width="300" height="300">
+        <img src="" onload="scalingBanner(this)" width="" height="">
+    </div> 
+ -->
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            规范导航器接口
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2018/09/14/programming/navigation-interface/">
+            <time datetime="2018-09-14T18:01:00.000Z" itemprop="datePublished">2018-09-14</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/技术文档（软件）/">技术文档（软件）</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/算法/">算法</a>, <a class="tag-link" href="/tags/路径规划/">路径规划</a>, <a class="tag-link" href="/tags/造轮子/">造轮子</a>
+    </div>
+
+                        
+    <div>
+        <i class="fas fa-pencil-alt"></i>
+        Ydr
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>通过前一段时间实现的动态窗口法导航，我对导航模块也有了更深一层的认识。为了使软硬件异构的机器人都能使用导航模块，我抽象出了导航模块，以及可导航运动平台的共性，其实现即规范导航器接口。本文主要介绍导航器的模型和概念，并辅以少量演示代码。</p>
+<p>下文中“导航”与“局部路径规划”是等价的，可互换。</p>
+<h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>以动态窗口法和定时弹带法为代表的一系列导航算法具有相同的运行过程，即预测→优化→控制。其中预测过程确定有效控制量的范围，并根据控制量预测机器人可能轨迹；优化过程从所有可能轨迹里找到最优的一条；控制过程执行最优轨迹对应的控制量。</p>
+<p>局部路径规划中有2个重要的概念。</p>
+<h4 id="1-轨迹-trajectory"><a href="#1-轨迹-trajectory" class="headerlink" title="1. 轨迹 trajectory"></a>1. 轨迹 <em>trajectory</em></h4><p>轨迹正式局部路径规划算法应该给出的结果。那轨迹究竟是什么呢？请参阅 <a href="https://blog.csdn.net/wx545644217/article/details/54175035" target="_blank" rel="noopener">较为详细的阐述</a>，但此处给出结论：所谓轨迹，即是<strong>时刻到机器人位姿的映射关系</strong>。</p>
+   <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">trajectory := time -&gt; pose</span><br></pre></td></tr></table></figure>
+   <figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 轨迹</span></span><br><span class="line"><span class="comment"> * 时间到位姿的映射</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">ITrajectory</span> </span>&#123;</span><br><span class="line">	...</span><br><span class="line"></span><br><span class="line">	<span class="comment">/** <span class="doctag">@return</span> 某时刻的位姿 */</span></span><br><span class="line">	<span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="title">get</span><span class="params">(time: <span class="type">Double</span>)</span></span>: Pose?</span><br><span class="line"></span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>   有了轨迹，就能对机器人的运动进行评判，从而选出最优的控制量。</p>
+<h4 id="2-运动模型"><a href="#2-运动模型" class="headerlink" title="2. 运动模型"></a>2. 运动模型</h4><p><strong>从控制量获取轨迹的过程就是运动模型。</strong>用信号与系统的话说，控制是对定位平台的激励，而平台对控制的响应则是运动（轨迹），而激励到响应的传递函数就是运动模型。</p>
+   <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">model := current pose * command -&gt; trajectory</span><br></pre></td></tr></table></figure>
+   <figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 可导航的</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> T 控制量类型</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">INavigatable</span>&lt;<span class="type">T</span>&gt; </span>&#123;</span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * 轨迹预测</span></span><br><span class="line"><span class="comment">	 * 基于当前位姿、速度等状态量和控制量，计算未来一段时间的运动轨迹</span></span><br><span class="line"><span class="comment">	 * 各种运动学状态量表现为位姿的 n 阶导数</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> current 当前位姿及位姿的 n 阶导数</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> cmd     控制量</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="function"><span class="keyword">fun</span> <span class="title">predict</span><span class="params">(current: <span class="type">Map</span>&lt;<span class="type">Int</span>, Pose&gt;, cmd: <span class="type">T</span>)</span></span>: ITrajectory</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运动模型，尤其是有速度甚至加速度参与的精确的运动模型与机械结构的设计是密不可分的。所以运动模型的数学表达应该是由机械工程师提供的。近期我将另撰一文讨论机械控制和软件的界限问题。</p>
+<h3 id="轨迹的表示"><a href="#轨迹的表示" class="headerlink" title="轨迹的表示"></a>轨迹的表示</h3><p>轨迹通常来源于预测，而预测总是基于某种不变性的假设（如速度是常数或加速度是常数），因此轨迹具有时效性。定义域说明了轨迹有效的范围。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">ITrajectory</span> </span>&#123;</span><br><span class="line">	<span class="comment">/** 定义域 */</span></span><br><span class="line">	<span class="keyword">val</span> timeRange: DoubleRange</span><br><span class="line"></span><br><span class="line">	<span class="comment">/** <span class="doctag">@return</span> 某时刻的位姿 */</span></span><br><span class="line">	<span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="title">get</span><span class="params">(time: <span class="type">Double</span>)</span></span>: Pose?</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>轨迹定义为时刻到机器人位姿的映射，但这种映射关系并不总是可以用函数表达的，它在不同的系统中可能是方程或其他不方便求解的特殊形式。对于这种情况，枚举通常是行之有效的表达方式。对连续轨迹进行采样，可以得到离散轨迹。采样点足够密集的离散轨迹也能正确描述一个运动。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** 离散位姿点组成的轨迹 */</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">IDiscreteTrajectory</span> : <span class="type">ITrajectory &#123;</span></span></span><br><span class="line">	<span class="comment">/** 可获取精确位姿的周期 */</span></span><br><span class="line">	<span class="keyword">val</span> period: <span class="built_in">Double</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/** 丢弃时间信息，转为有序的位姿列表 */</span></span><br><span class="line">	<span class="keyword">val</span> path: List&lt;Pose&gt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>工程已经提供了对连续轨迹、等间隔采样离散轨迹和任意采样离散轨迹的实现，开发者可自行查阅。</p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+    <div class="a2a_kit a2a_default_style">
+    <a class="a2a_dd" href="https://www.addtoany.com/share">Share</a>
+    <span class="a2a_divider"></span>
+    <!-- <a class="a2a_button_facebook"></a>
+    <a class="a2a_button_twitter"></a>
+    <a class="a2a_button_google_plus"></a>
+    <a class="a2a_button_pinterest"></a>
+    <a class="a2a_button_tumblr"></a> -->
+    <a class="a2a_button_wechat"></a>
+    <a class="a2a_button_sina_weibo"></a>
+</div>
+<script type="text/javascript" src="//static.addtoany.com/menu/page.js"></script>
+<style>
+    .a2a_menu {
+        border-radius: 4px;
+    }
+    .a2a_menu a {
+        margin: 2px 0;
+        font-size: 14px;
+        line-height: 16px;
+        border-radius: 4px;
+        color: inherit !important;
+        font-family: 'Microsoft Yahei';
+    }
+    #a2apage_dropdown {
+        margin: 10px 0;
+    }
+    .a2a_mini_services {
+        padding: 10px;
+    }
+    a.a2a_i,
+    i.a2a_i {
+        width: 122px;
+        line-height: 16px;
+    }
+    a.a2a_i .a2a_svg,
+    a.a2a_more .a2a_svg {
+        width: 16px;
+        height: 16px;
+        line-height: 16px;
+        vertical-align: top;
+        background-size: 16px;
+    }
+    a.a2a_i {
+        border: none !important;
+    }
+    a.a2a_menu_show_more_less {
+        margin: 0;
+        padding: 10px 0;
+        line-height: 16px;
+    }
+    .a2a_mini_services:after{content:".";display:block;height:0;clear:both;visibility:hidden}
+    .a2a_mini_services{*+height:1%;}
+</style>
+
+</div>
+
+            
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2018/09/16/briefing/communication-defy-2018.09.16/" id="article-nav-newer" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">上一篇</strong>
+            <div class="article-nav-title">
+                
+                    师大二附交流活动简报
+                
+            </div>
+        </a>
+    
+    
+        <a href="/2018/09/12/programming/statemachine-2/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">下一篇</strong>
+            <div class="article-nav-title">状态机——(1)</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+
+</section>
+            
+                
+<aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="no-thumbnail">
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/8102/01/01/others/hello-world/" class="title">MechDancer Team 1329</a></p>
+                            <p class="item-date"><time datetime="8102-01-01T00:00:00.000Z" itemprop="datePublished">8102-01-01</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/技术文档（软件）/">技术文档（软件）</a></p>
+                            <p class="item-title"><a href="/2018/11/12/programming/scanning-digit-comment-DFA/" class="title">确定性有穷自动机实现单词、数字和注释扫描</a></p>
+                            <p class="item-date"><time datetime="2018-11-12T00:00:00.000Z" itemprop="datePublished">2018-11-12</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/简报-总结/">简报/总结</a></p>
+                            <p class="item-title"><a href="/2018/09/16/briefing/communication-defy-2018.09.16/" class="title">师大二附交流活动简报</a></p>
+                            <p class="item-date"><time datetime="2018-09-16T16:00:00.000Z" itemprop="datePublished">2018-09-16</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/技术文档（软件）/">技术文档（软件）</a></p>
+                            <p class="item-title"><a href="/2018/09/14/programming/navigation-interface/" class="title">规范导航器接口</a></p>
+                            <p class="item-date"><time datetime="2018-09-14T18:01:00.000Z" itemprop="datePublished">2018-09-14</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/技术文档（软件）/">技术文档（软件）</a></p>
+                            <p class="item-title"><a href="/2018/09/12/programming/statemachine-2/" class="title">状态机——(1)</a></p>
+                            <p class="item-date"><time datetime="2018-09-12T17:43:00.000Z" itemprop="datePublished">2018-09-12</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/技术文档（机械）/">技术文档（机械）</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术文档（软件）/">技术文档（软件）</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/简报-总结/">简报/总结</a><span class="category-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/8102/01/">一月 8102</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">九月 2018</a><span class="archive-list-count">6</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">标签</h3>
+        <div class="widget">
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/交流活动/">交流活动</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/任务分析/">任务分析</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/状态机/">状态机</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/编译原理/">编译原理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计建议/">设计建议</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/路径规划/">路径规划</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/造轮子/">造轮子</a><span class="tag-list-count">4</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">标签云</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/交流活动/" style="font-size: 10px;">交流活动</a> <a href="/tags/任务分析/" style="font-size: 13.33px;">任务分析</a> <a href="/tags/状态机/" style="font-size: 13.33px;">状态机</a> <a href="/tags/算法/" style="font-size: 16.67px;">算法</a> <a href="/tags/编译原理/" style="font-size: 10px;">编译原理</a> <a href="/tags/设计建议/" style="font-size: 10px;">设计建议</a> <a href="/tags/路径规划/" style="font-size: 13.33px;">路径规划</a> <a href="/tags/造轮子/" style="font-size: 20px;">造轮子</a>
+        </div>
+    </div>
+
+    
+    <div id="toTop" class="fas fa-angle-up"></div>
+</aside>
+
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2019 MechDancer<br>
+            <!-- Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="http://github.com/ppoffice">PPOffice</a> -->
+        </div>
+    </div>
+</footer>
+        
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+        <script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    
+    
+        <script type="text/x-mathjax-config">
+            MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] } });
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+    
+    <title>确定性有穷自动机实现单词、数字和注释扫描 | MechDancer - 机械舞者</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="介绍通过将整段的字符串结成单词，扫描器 可以显著简化语法分析的难度。而构造分词扫描器的通用方法就是使用 正则表达式 和 有穷自动机。有时设计一个新语言的第一步就是实现正则引擎，以便方便地测试词法分析，但是直接编码来产生自动机也是可行的，并且在词类较少时更方便调试和修改。  下面我们所说的 单词（token） 指的是一类具有特殊含义的字符串，为了与通常的单词（word）区分开，这种 单词 都使用粗体">
+<meta name="keywords" content="算法,造轮子,编译原理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="确定性有穷自动机实现单词、数字和注释扫描">
+<meta property="og:url" content="http://mechdancer.org/2018/11/12/programming/scanning-digit-comment-DFA/index.html">
+<meta property="og:site_name" content="MechDancer - 机械舞者">
+<meta property="og:description" content="介绍通过将整段的字符串结成单词，扫描器 可以显著简化语法分析的难度。而构造分词扫描器的通用方法就是使用 正则表达式 和 有穷自动机。有时设计一个新语言的第一步就是实现正则引擎，以便方便地测试词法分析，但是直接编码来产生自动机也是可行的，并且在词类较少时更方便调试和修改。  下面我们所说的 单词（token） 指的是一类具有特殊含义的字符串，为了与通常的单词（word）区分开，这种 单词 都使用粗体">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://mechdancer.org/images/scanning-digit-comment-DFA-DFA-digit.png">
+<meta property="og:updated_time" content="2019-02-01T03:39:37.045Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="确定性有穷自动机实现单词、数字和注释扫描">
+<meta name="twitter:description" content="介绍通过将整段的字符串结成单词，扫描器 可以显著简化语法分析的难度。而构造分词扫描器的通用方法就是使用 正则表达式 和 有穷自动机。有时设计一个新语言的第一步就是实现正则引擎，以便方便地测试词法分析，但是直接编码来产生自动机也是可行的，并且在词类较少时更方便调试和修改。  下面我们所说的 单词（token） 指的是一类具有特殊含义的字符串，为了与通常的单词（word）区分开，这种 单词 都使用粗体">
+<meta name="twitter:image" content="http://mechdancer.org/images/scanning-digit-comment-DFA-DFA-digit.png">
+    
+
+    
+
+    
+        <link rel="icon" href="/css/images/favicon.png">
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-brands.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-solid.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+        <link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+    
+    
+    
+    
+
+
+</head>
+</html>
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">MechDancer - 机械舞者</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">主页</a>
+                
+                    <a class="main-nav-link" href="/archives">归档</a>
+                
+                    <a class="main-nav-link" href="/categories">分类</a>
+                
+                    <a class="main-nav-link" href="/tags">标签</a>
+                
+                    <a class="main-nav-link" href="/about">关于</a>
+                
+            </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索">
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么...">
+            <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">主页</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">归档</a></td>
+                
+                    <td><a class="main-nav-link" href="/categories">分类</a></td>
+                
+                    <td><a class="main-nav-link" href="/tags">标签</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">关于</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索">
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+            <section id="main"><article id="post-programming/scanning-digit-comment-DFA" class="article article-type-post" itemscope="" itemprop="blogPost">
+
+    <!-- <script>
+        function scalingBanner(obj){
+            var $this=obj
+
+            var imgWidth=$this.width();
+            var imgHeight=$this.height();
+        
+            var result=scalingImage(imgWidth,imgHeight,300,300)
+            
+            $this.attr('width',result.width)
+            $this.attr('height',result.height)
+        }
+
+        function scalingImage(imgWidth, imgHeight, containerWidth, containerHeight) {
+            var containerRatio = containerWidth / containerHeight;
+            var imgRatio = imgWidth / imgHeight;
+        
+            if (imgRatio > containerRatio) {
+                imgWidth = containerWidth;
+                imgHeight = containerWidth / imgRatio;
+            } else if (imgRatio < containerRatio) {
+                imgHeight = containerHeight;
+                imgWidth = containerHeight * imgRatio;
+            } else {
+                imgWidth = containerWidth;
+                imgHeight = containerHeight;
+            }
+        
+            return { width: imgWidth, height: imgHeight };
+        }
+
+    </script>
+
+    <div style="display:none">
+        <img src="/../images/scanning-digit-comment-DFA-DFA-digit.png" width="300" height="300">
+        <img src="/../images/scanning-digit-comment-DFA-DFA-digit.png" onload="scalingBanner(this)" width="" height="">
+    </div> 
+ -->
+    <div class="article-inner">
+        
+            
+	
+		<img src="/../images/scanning-digit-comment-DFA-DFA-digit.png" class="article-banner">
+	
+
+
+
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            确定性有穷自动机实现单词、数字和注释扫描
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2018/11/12/programming/scanning-digit-comment-DFA/">
+            <time datetime="2018-11-12T00:00:00.000Z" itemprop="datePublished">2018-11-12</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/技术文档（软件）/">技术文档（软件）</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/算法/">算法</a>, <a class="tag-link" href="/tags/编译原理/">编译原理</a>, <a class="tag-link" href="/tags/造轮子/">造轮子</a>
+    </div>
+
+                        
+    <div>
+        <i class="fas fa-pencil-alt"></i>
+        Ydr
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>通过将整段的字符串结成单词，<strong>扫描器</strong> 可以显著简化语法分析的难度。而构造分词扫描器的通用方法就是使用 <strong>正则表达式</strong> 和 <strong>有穷自动机</strong>。有时设计一个新语言的第一步就是实现正则引擎，以便方便地测试词法分析，但是直接编码来产生自动机也是可行的，并且在词类较少时更方便调试和修改。</p>
+<ul>
+<li>下面我们所说的 <strong>单词（token）</strong> 指的是一类具有特殊含义的字符串，为了与通常的单词（word）区分开，这种 <strong>单词</strong> 都使用粗体。</li>
+</ul>
+<p>在代码中，扫描器是这样的东西：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Scanner</span>&lt;<span class="type">T</span>&gt; </span>&#123;           <span class="comment">// 输入单元类型为 T 的有状态的扫描器</span></span><br><span class="line">	<span class="keyword">val</span> length: <span class="built_in">Int</span>              <span class="comment">// 匹配状态：当前匹配的长度</span></span><br><span class="line">	<span class="keyword">val</span> complete: <span class="built_in">Boolean</span>        <span class="comment">// 匹配状态：是否在可接受的结束状态</span></span><br><span class="line">	<span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="title">invoke</span><span class="params">(char: <span class="type">T</span>)</span></span> <span class="comment">// 输入一个 T 类型的单元 char</span></span><br><span class="line">	<span class="function"><span class="keyword">fun</span> <span class="title">reset</span><span class="params">()</span></span>                  <span class="comment">// 重置内部状态</span></span><br><span class="line">&#125;                                <span class="comment">//</span></span><br></pre></td></tr></table></figure>
+<p>基于自动机的扫描器包含一系列 <strong>状态</strong>，其中有且仅有一个是起始状态，并有一部分状态是可接受的结束状态。每次扫描开始时，状态机从起始状态出发，对每一个输入单元发生一次状态转移，直到所有单元都输入到扫描器或扫描器因不合法的字符落入到不存在/错误的的状态中。</p>
+<p>通过非常简单的代码就可以实现一个自动机引擎：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 确定性自动机扫描器</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> table  状态转移表（*行序号从 1 开始*，*0 表示错误状态*）</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> ending 合法结束状态</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> map    字符到转移表列序号的映射关系（*-1 表示无效字符*）</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DFA</span>&lt;<span class="type">T</span>&gt;</span>(</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">val</span> table: List&lt;List&lt;<span class="built_in">Int</span>&gt;&gt;,</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">val</span> ending: Set&lt;<span class="built_in">Int</span>&gt;,</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">val</span> map: (T) -&gt; <span class="built_in">Int</span></span><br><span class="line">) : Scanner&lt;T&gt; &#123;</span><br><span class="line">	<span class="comment">// 当前状态（序号）</span></span><br><span class="line">	<span class="comment">// 正数表示正在匹配</span></span><br><span class="line">	<span class="comment">// 负数表示匹配失败前的最后状态，即能匹配的部分的结束状态</span></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">var</span> state = <span class="number">1</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">override</span> <span class="keyword">var</span> length: <span class="built_in">Int</span> = <span class="number">0</span>; <span class="keyword">private</span> <span class="keyword">set</span></span><br><span class="line">	<span class="keyword">override</span> <span class="keyword">val</span> complete <span class="keyword">get</span>() = abs(state) <span class="keyword">in</span> ending</span><br><span class="line"></span><br><span class="line">	<span class="keyword">override</span> <span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="title">invoke</span><span class="params">(char: <span class="type">T</span>)</span></span> &#123;</span><br><span class="line">		<span class="keyword">if</span> (state &gt; <span class="number">0</span>) &#123;</span><br><span class="line">			state = map(char)</span><br><span class="line">				<span class="comment">// 是一个有意义的字符</span></span><br><span class="line">				.takeIf &#123; it &gt;= <span class="number">0</span> &#125;</span><br><span class="line">				<span class="comment">// 查找转移表</span></span><br><span class="line">				?.let &#123; table[state - <span class="number">1</span>][it] &#125;</span><br><span class="line">				<span class="comment">// 不导致错误状态</span></span><br><span class="line">				?.takeIf &#123; it != <span class="number">0</span> &#125;</span><br><span class="line">				<span class="comment">// 匹配长度增加</span></span><br><span class="line">				?.also &#123;   length &#125;</span><br><span class="line">				<span class="comment">// 否则标记匹配结束</span></span><br><span class="line">				?: -state</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">reset</span><span class="params">()</span></span> &#123;</span><br><span class="line">		state = <span class="number">1</span></span><br><span class="line">		length = <span class="number">0</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面的代码展示了我实现的自动机引擎。其中类的构造参数描述了某一个状态机实例的结构。</p>
+<ul>
+<li><code>table</code> 是用数字表示的状态转移表，表的每一行表示一个状态，每一列表示在某状态下针对一类输入字符将转移到哪个状态；</li>
+<li><code>ending</code> 是合法结束状态的集合，状态机根据当前状态是否集合中的元素判断匹配是否完成；</li>
+<li><code>map</code> 是实际输入字符到状态转移表列的映射关系。用 -1 列表示转到错误状态；</li>
+</ul>
+<p>这是数字扫描器实际使用的状态机参数，后面会讲到如何决定这些参数：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">table = <span class="comment">//     0   1   d   b   h   x   .    //</span></span><br><span class="line">listOf(listOf( <span class="number">2</span>, <span class="number">11</span>, <span class="number">11</span>,  <span class="number">0</span>,  <span class="number">0</span>,  <span class="number">0</span>, <span class="number">12</span>),  <span class="comment">// 1  -&gt; ε</span></span><br><span class="line">	   listOf(<span class="number">11</span>, <span class="number">11</span>, <span class="number">11</span>,  <span class="number">3</span>,  <span class="number">0</span>,  <span class="number">7</span>, <span class="number">12</span>),  <span class="comment">// 2  -&gt; 0</span></span><br><span class="line">	   listOf( <span class="number">4</span>,  <span class="number">4</span>,  <span class="number">0</span>,  <span class="number">0</span>,  <span class="number">0</span>,  <span class="number">0</span>,  <span class="number">5</span>),  <span class="comment">// 3  -&gt; 0b</span></span><br><span class="line">	   listOf( <span class="number">4</span>,  <span class="number">4</span>,  <span class="number">0</span>,  <span class="number">0</span>,  <span class="number">0</span>,  <span class="number">0</span>,  <span class="number">5</span>),  <span class="comment">// 4  -&gt; 0b...</span></span><br><span class="line">	   listOf( <span class="number">6</span>,  <span class="number">6</span>,  <span class="number">0</span>,  <span class="number">0</span>,  <span class="number">0</span>,  <span class="number">0</span>,  <span class="number">0</span>),  <span class="comment">// 5  -&gt; 0b... .</span></span><br><span class="line">	   listOf( <span class="number">6</span>,  <span class="number">6</span>,  <span class="number">0</span>,  <span class="number">0</span>,  <span class="number">0</span>,  <span class="number">0</span>,  <span class="number">0</span>),  <span class="comment">// 6  -&gt; 0b... . ...</span></span><br><span class="line">       listOf( <span class="number">8</span>,  <span class="number">8</span>,  <span class="number">8</span>,  <span class="number">8</span>,  <span class="number">8</span>,  <span class="number">0</span>,  <span class="number">9</span>),  <span class="comment">// 7  -&gt; 0x</span></span><br><span class="line">       listOf( <span class="number">8</span>,  <span class="number">8</span>,  <span class="number">8</span>,  <span class="number">8</span>,  <span class="number">8</span>,  <span class="number">0</span>,  <span class="number">9</span>),  <span class="comment">// 8  -&gt; 0x...</span></span><br><span class="line">       listOf(<span class="number">10</span>, <span class="number">10</span>, <span class="number">10</span>, <span class="number">10</span>, <span class="number">10</span>,  <span class="number">0</span>,  <span class="number">0</span>),  <span class="comment">// 9  -&gt; 0x... .</span></span><br><span class="line">       listOf(<span class="number">10</span>, <span class="number">10</span>, <span class="number">10</span>, <span class="number">10</span>, <span class="number">10</span>,  <span class="number">0</span>,  <span class="number">0</span>),  <span class="comment">// 10 -&gt; 0x... . ...</span></span><br><span class="line">       listOf(<span class="number">11</span>, <span class="number">11</span>, <span class="number">11</span>,  <span class="number">0</span>,  <span class="number">0</span>,  <span class="number">0</span>, <span class="number">12</span>),  <span class="comment">// 11 -&gt; ...</span></span><br><span class="line">       listOf(<span class="number">13</span>, <span class="number">13</span>, <span class="number">13</span>,  <span class="number">0</span>,  <span class="number">0</span>,  <span class="number">0</span>,  <span class="number">0</span>),  <span class="comment">// 12 -&gt; ... .</span></span><br><span class="line">       listOf(<span class="number">13</span>, <span class="number">13</span>, <span class="number">13</span>,  <span class="number">0</span>,  <span class="number">0</span>,  <span class="number">0</span>,  <span class="number">0</span>)), <span class="comment">// 13 -&gt; ... . ...</span></span><br><span class="line">ending = </span><br><span class="line">setOf(<span class="number">2</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="number">8</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">13</span>),</span><br><span class="line">map = </span><br><span class="line">&#123; c: <span class="built_in">Char</span> -&gt;</span><br><span class="line">    <span class="keyword">when</span> (c.toLowerCase()) &#123;</span><br><span class="line">        <span class="string">'0'</span>         -&gt; <span class="number">0</span>  <span class="comment">// 0</span></span><br><span class="line">        <span class="string">'1'</span>         -&gt; <span class="number">1</span>  <span class="comment">// 1</span></span><br><span class="line">        <span class="keyword">in</span> <span class="string">'0'</span>..<span class="string">'9'</span> -&gt; <span class="number">2</span>  <span class="comment">// d</span></span><br><span class="line">        <span class="string">'b'</span>         -&gt; <span class="number">3</span>  <span class="comment">// b</span></span><br><span class="line">        <span class="keyword">in</span> <span class="string">'a'</span>..<span class="string">'f'</span> -&gt; <span class="number">4</span>  <span class="comment">// h</span></span><br><span class="line">        <span class="string">'x'</span>         -&gt; <span class="number">5</span>  <span class="comment">// x</span></span><br><span class="line">        <span class="string">'.'</span>         -&gt; <span class="number">6</span>  <span class="comment">// .</span></span><br><span class="line">        <span class="keyword">else</span>        -&gt; -<span class="number">1</span> <span class="comment">// e</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>实现一个基于自动机的扫描器有三个步骤：</p>
+<ol>
+<li>根据要扫描的 <strong>单词</strong> 的特征设计识别 <strong>单词</strong> 的正则表达式；</li>
+<li>直接将正则表达式（及其连接、选择和 Kleene 星号等元操作）转化为包含空转移的非确定性自动机 NFA；</li>
+<li>对NFA进行约化和化简得到确定性有穷自动机 DFA；</li>
+</ol>
+<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><p>虽然编译原理是每个计算机专业学生的必修课，但网上其实连能正确扫描 C 语言风格注释的 DFA 实现也很难找到。此处就以这个为例子介绍如何构造自动机扫描器。</p>
+<ol>
+<li><p>正则</p>
+<p>C 语言风格的注释有两种形式：</p>
+<ul>
+<li>嵌入型 <code>/* … */</code></li>
+<li>行尾型 <code>// …</code></li>
+</ul>
+<p>第一步先写出辨别这两种注释的正则表达式：</p>
+<ul>
+<li>嵌入型 <code>/*(?*)*/</code></li>
+<li>行尾型 <code>//(?*)</code></li>
+</ul>
+<p>其中小括号内的 * 是 Kleene 星号，表示匹配任意字符任意次。</p>
+</li>
+<li><p>NFA</p>
+<p>正则对应的 NFA 如图所示。现在先假设我们直接使用换行符分句，因此两种形式都不接受换行符，行尾型也不需要换行符来结束，因此可以直接简化到自环，不必再写出 Kleene 星号。</p>
+<p><img src="/../images/scanning-digit-comment-DFA-NFA.png" alt="NFA"></p>
+</li>
+<li><p>DFA</p>
+<p>由上图已经可以清晰地看到对于注释扫描来说，输入字符只有 3 类：</p>
+<p>| 字符 | 代号 | 列号 |<br>| :–: | :–: | :–: |<br>| / | / | 0 |<br>| <em> | </em> | 1 |<br>| 其他 | e | 2 |</p>
+<p>因此可以简化 DFA，主要操作就是：</p>
+<ul>
+<li>消除 ε 转换的歧义性；</li>
+<li>消除相同符号的歧义性；</li>
+</ul>
+<p>转化后如图：</p>
+<p><img src="/../images/scanning-digit-comment-DFA-DFA.png" alt="DFA"></p>
+</li>
+</ol>
+<ol start="4">
+<li><p>编写代码</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ------ //  /  *  e    //</span></span><br><span class="line">listOf(listOf(<span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>),  <span class="comment">// 1 -&gt; ε</span></span><br><span class="line">       listOf(<span class="number">3</span>, <span class="number">4</span>, <span class="number">0</span>),  <span class="comment">// 2 -&gt; /</span></span><br><span class="line">       listOf(<span class="number">3</span>, <span class="number">3</span>, <span class="number">3</span>),  <span class="comment">// 3 -&gt; // ...</span></span><br><span class="line">       listOf(<span class="number">6</span>, <span class="number">5</span>, <span class="number">6</span>),  <span class="comment">// 4 -&gt; /*</span></span><br><span class="line">       listOf(<span class="number">7</span>, <span class="number">5</span>, <span class="number">6</span>),  <span class="comment">// 5 -&gt; /* ... *</span></span><br><span class="line">       listOf(<span class="number">6</span>, <span class="number">5</span>, <span class="number">6</span>),  <span class="comment">// 6 -&gt; /* ...</span></span><br><span class="line">       listOf(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>)), <span class="comment">// 7 -&gt; /* ... */</span></span><br><span class="line">setOf(<span class="number">5</span>, <span class="number">7</span>),</span><br><span class="line">&#123; c: <span class="built_in">Char</span> -&gt;</span><br><span class="line">    <span class="keyword">when</span> (c) &#123;</span><br><span class="line">        <span class="string">'/'</span>  -&gt; <span class="number">0</span></span><br><span class="line">        <span class="string">'*'</span>  -&gt; <span class="number">1</span></span><br><span class="line">        <span class="keyword">else</span> -&gt; <span class="number">2</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="数字扫描器"><a href="#数字扫描器" class="headerlink" title="数字扫描器"></a>数字扫描器</h2><p>如图：</p>
+<ul>
+<li><p>NFA</p>
+<p><img src="/../images/scanning-digit-comment-DFA-NFA-digit.png" alt="NFA digit"></p>
+</li>
+<li><p>DFA</p>
+<p><img src="/../images/scanning-digit-comment-DFA-DFA-digit.png" alt="DFA digit"></p>
+</li>
+</ul>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+    <div class="a2a_kit a2a_default_style">
+    <a class="a2a_dd" href="https://www.addtoany.com/share">Share</a>
+    <span class="a2a_divider"></span>
+    <!-- <a class="a2a_button_facebook"></a>
+    <a class="a2a_button_twitter"></a>
+    <a class="a2a_button_google_plus"></a>
+    <a class="a2a_button_pinterest"></a>
+    <a class="a2a_button_tumblr"></a> -->
+    <a class="a2a_button_wechat"></a>
+    <a class="a2a_button_sina_weibo"></a>
+</div>
+<script type="text/javascript" src="//static.addtoany.com/menu/page.js"></script>
+<style>
+    .a2a_menu {
+        border-radius: 4px;
+    }
+    .a2a_menu a {
+        margin: 2px 0;
+        font-size: 14px;
+        line-height: 16px;
+        border-radius: 4px;
+        color: inherit !important;
+        font-family: 'Microsoft Yahei';
+    }
+    #a2apage_dropdown {
+        margin: 10px 0;
+    }
+    .a2a_mini_services {
+        padding: 10px;
+    }
+    a.a2a_i,
+    i.a2a_i {
+        width: 122px;
+        line-height: 16px;
+    }
+    a.a2a_i .a2a_svg,
+    a.a2a_more .a2a_svg {
+        width: 16px;
+        height: 16px;
+        line-height: 16px;
+        vertical-align: top;
+        background-size: 16px;
+    }
+    a.a2a_i {
+        border: none !important;
+    }
+    a.a2a_menu_show_more_less {
+        margin: 0;
+        padding: 10px 0;
+        line-height: 16px;
+    }
+    .a2a_mini_services:after{content:".";display:block;height:0;clear:both;visibility:hidden}
+    .a2a_mini_services{*+height:1%;}
+</style>
+
+</div>
+
+            
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/8102/01/01/others/hello-world/" id="article-nav-newer" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">上一篇</strong>
+            <div class="article-nav-title">
+                
+                    MechDancer Team 1329
+                
+            </div>
+        </a>
+    
+    
+        <a href="/2018/09/16/briefing/communication-defy-2018.09.16/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">下一篇</strong>
+            <div class="article-nav-title">师大二附交流活动简报</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+
+</section>
+            
+                
+<aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="no-thumbnail">
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/8102/01/01/others/hello-world/" class="title">MechDancer Team 1329</a></p>
+                            <p class="item-date"><time datetime="8102-01-01T00:00:00.000Z" itemprop="datePublished">8102-01-01</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/技术文档（软件）/">技术文档（软件）</a></p>
+                            <p class="item-title"><a href="/2018/11/12/programming/scanning-digit-comment-DFA/" class="title">确定性有穷自动机实现单词、数字和注释扫描</a></p>
+                            <p class="item-date"><time datetime="2018-11-12T00:00:00.000Z" itemprop="datePublished">2018-11-12</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/简报-总结/">简报/总结</a></p>
+                            <p class="item-title"><a href="/2018/09/16/briefing/communication-defy-2018.09.16/" class="title">师大二附交流活动简报</a></p>
+                            <p class="item-date"><time datetime="2018-09-16T16:00:00.000Z" itemprop="datePublished">2018-09-16</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/技术文档（软件）/">技术文档（软件）</a></p>
+                            <p class="item-title"><a href="/2018/09/14/programming/navigation-interface/" class="title">规范导航器接口</a></p>
+                            <p class="item-date"><time datetime="2018-09-14T18:01:00.000Z" itemprop="datePublished">2018-09-14</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/技术文档（软件）/">技术文档（软件）</a></p>
+                            <p class="item-title"><a href="/2018/09/12/programming/statemachine-2/" class="title">状态机——(1)</a></p>
+                            <p class="item-date"><time datetime="2018-09-12T17:43:00.000Z" itemprop="datePublished">2018-09-12</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/技术文档（机械）/">技术文档（机械）</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术文档（软件）/">技术文档（软件）</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/简报-总结/">简报/总结</a><span class="category-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/8102/01/">一月 8102</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">九月 2018</a><span class="archive-list-count">6</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">标签</h3>
+        <div class="widget">
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/交流活动/">交流活动</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/任务分析/">任务分析</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/状态机/">状态机</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/编译原理/">编译原理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计建议/">设计建议</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/路径规划/">路径规划</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/造轮子/">造轮子</a><span class="tag-list-count">4</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">标签云</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/交流活动/" style="font-size: 10px;">交流活动</a> <a href="/tags/任务分析/" style="font-size: 13.33px;">任务分析</a> <a href="/tags/状态机/" style="font-size: 13.33px;">状态机</a> <a href="/tags/算法/" style="font-size: 16.67px;">算法</a> <a href="/tags/编译原理/" style="font-size: 10px;">编译原理</a> <a href="/tags/设计建议/" style="font-size: 10px;">设计建议</a> <a href="/tags/路径规划/" style="font-size: 13.33px;">路径规划</a> <a href="/tags/造轮子/" style="font-size: 20px;">造轮子</a>
+        </div>
+    </div>
+
+    
+    <div id="toTop" class="fas fa-angle-up"></div>
+</aside>
+
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2019 MechDancer<br>
+            <!-- Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="http://github.com/ppoffice">PPOffice</a> -->
+        </div>
+    </div>
+</footer>
+        
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+        <script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    
+    
+        <script type="text/x-mathjax-config">
+            MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] } });
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>

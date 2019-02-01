@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+    
+    <title>速度窗口法实现局部路径规划 | MechDancer - 机械舞者</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="前言速度窗口法实现库 (dynamic window approach) 已完成实现和封装，并依赖了线性代数工具 的二维和三维向量工具。原理在此，现在尚未实现避障功能。 本文主要介绍使用方法和注意事项。 前提条件和注意事项要将 DWA (dynamic window approach) 适配到自己的机器人，请保证机器人具备全场定位功能，已为可行驶区域建立笛卡尔坐标系，并能正确获取自身位姿。位姿即机">
+<meta name="keywords" content="算法,路径规划">
+<meta property="og:type" content="article">
+<meta property="og:title" content="速度窗口法实现局部路径规划">
+<meta property="og:url" content="http://mechdancer.org/2018/09/12/programming/navigation.dwa/index.html">
+<meta property="og:site_name" content="MechDancer - 机械舞者">
+<meta property="og:description" content="前言速度窗口法实现库 (dynamic window approach) 已完成实现和封装，并依赖了线性代数工具 的二维和三维向量工具。原理在此，现在尚未实现避障功能。 本文主要介绍使用方法和注意事项。 前提条件和注意事项要将 DWA (dynamic window approach) 适配到自己的机器人，请保证机器人具备全场定位功能，已为可行驶区域建立笛卡尔坐标系，并能正确获取自身位姿。位姿即机">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-02-01T03:39:37.045Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="速度窗口法实现局部路径规划">
+<meta name="twitter:description" content="前言速度窗口法实现库 (dynamic window approach) 已完成实现和封装，并依赖了线性代数工具 的二维和三维向量工具。原理在此，现在尚未实现避障功能。 本文主要介绍使用方法和注意事项。 前提条件和注意事项要将 DWA (dynamic window approach) 适配到自己的机器人，请保证机器人具备全场定位功能，已为可行驶区域建立笛卡尔坐标系，并能正确获取自身位姿。位姿即机">
+    
+
+    
+
+    
+        <link rel="icon" href="/css/images/favicon.png">
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-brands.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-solid.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+        <link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+    
+    
+    
+    
+
+
+</head>
+</html>
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">MechDancer - 机械舞者</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">主页</a>
+                
+                    <a class="main-nav-link" href="/archives">归档</a>
+                
+                    <a class="main-nav-link" href="/categories">分类</a>
+                
+                    <a class="main-nav-link" href="/tags">标签</a>
+                
+                    <a class="main-nav-link" href="/about">关于</a>
+                
+            </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索">
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么...">
+            <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">主页</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">归档</a></td>
+                
+                    <td><a class="main-nav-link" href="/categories">分类</a></td>
+                
+                    <td><a class="main-nav-link" href="/tags">标签</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">关于</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索">
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+            <section id="main"><article id="post-programming/navigation.dwa" class="article article-type-post" itemscope="" itemprop="blogPost">
+
+    <!-- <script>
+        function scalingBanner(obj){
+            var $this=obj
+
+            var imgWidth=$this.width();
+            var imgHeight=$this.height();
+        
+            var result=scalingImage(imgWidth,imgHeight,300,300)
+            
+            $this.attr('width',result.width)
+            $this.attr('height',result.height)
+        }
+
+        function scalingImage(imgWidth, imgHeight, containerWidth, containerHeight) {
+            var containerRatio = containerWidth / containerHeight;
+            var imgRatio = imgWidth / imgHeight;
+        
+            if (imgRatio > containerRatio) {
+                imgWidth = containerWidth;
+                imgHeight = containerWidth / imgRatio;
+            } else if (imgRatio < containerRatio) {
+                imgHeight = containerHeight;
+                imgWidth = containerHeight * imgRatio;
+            } else {
+                imgWidth = containerWidth;
+                imgHeight = containerHeight;
+            }
+        
+            return { width: imgWidth, height: imgHeight };
+        }
+
+    </script>
+
+    <div style="display:none">
+        <img src="" width="300" height="300">
+        <img src="" onload="scalingBanner(this)" width="" height="">
+    </div> 
+ -->
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            速度窗口法实现局部路径规划
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2018/09/12/programming/navigation.dwa/">
+            <time datetime="2018-09-12T14:53:00.000Z" itemprop="datePublished">2018-09-12</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/技术文档（软件）/">技术文档（软件）</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/算法/">算法</a>, <a class="tag-link" href="/tags/路径规划/">路径规划</a>
+    </div>
+
+                        
+    <div>
+        <i class="fas fa-pencil-alt"></i>
+        Ydr
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><a href="https://github.com/MechDancer/navigation.dwa" target="_blank" rel="noopener">速度窗口法实现库 (dynamic window approach)</a> 已完成实现和封装，并依赖了<a href="https://github.com/MechDancer/linearalgebra" target="_blank" rel="noopener">线性代数工具</a> 的二维和三维向量工具。<a href="https://blog.csdn.net/heyijia0327/article/details/44983551" target="_blank" rel="noopener">原理在此</a>，现在尚未实现避障功能。</p>
+<p>本文主要介绍使用方法和注意事项。</p>
+<h2 id="前提条件和注意事项"><a href="#前提条件和注意事项" class="headerlink" title="前提条件和注意事项"></a>前提条件和注意事项</h2><p>要将 DWA (dynamic window approach) 适配到自己的机器人，请保证机器人具备<strong>全场定位</strong>功能，已为可行驶区域建立笛卡尔坐标系，并能正确获取自身位姿。位姿即机器人坐标系相对场地坐标系的偏移，定义为三维向量[x, y, w]，默认初始化时机器人坐标系与场地坐标系重合，机器人面朝 x 轴方向，符合右手定则。</p>
+<p>导航模块假定机器人是<strong>非全向的</strong>，因此无法规划不与机器人坐标系 x 轴相切的路径，但原地转是受支持的。添加对全向的支持、或对个性化的机器人控制方式进行适配并不难，开发者可自行修改。</p>
+<p>每次获取控制量需要将机器人当前的控制量和位姿提交到导航器 <em>navigator</em> 。导航器将对每个提交的位姿数据计算一个控制量。不会自动插值，也不会进行任务调度，因此请保证外部以合适的频率提交位姿数据，以免发生振荡或延迟。</p>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><h3 id="1-构造导航器"><a href="#1-构造导航器" class="headerlink" title="1. 构造导航器"></a>1. 构造导航器</h3><p>   使用构造器来构造导航器：</p>
+   <figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> navigator = Navigator(Path(),Configuration( ... ))</span><br></pre></td></tr></table></figure>
+<p>   或使用 DSL 构造导航器（推荐）：</p>
+   <figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> navigator = navigator &#123; ... &#125;</span><br></pre></td></tr></table></figure>
+<p>   这样构造出来的导航器没有工作路径。</p>
+<h3 id="2-确定全局路径"><a href="#2-确定全局路径" class="headerlink" title="2. 确定全局路径"></a>2. 确定全局路径</h3><p>   本模块的定位是局部路径规划和导航，要实现完整的机器人控制，必须提供合理的全局路径。较为方便的测试方法是“录点”，即通过遥控示教来确定机器人全局路径。本模块内置的路径管理支持录点功能。</p>
+<p>   使用语句 <code>navigator.path += pose</code>来向工作路径末尾添加一个位姿点。</p>
+<p>   调用 <code>navigator.path.clear()</code> 将会清空工作路径。</p>
+<p>   你也可以访问 <code>navigator.path</code> 查看与路径相关的更多功能。</p>
+<h3 id="3-进行控制"><a href="#3-进行控制" class="headerlink" title="3. 进行控制"></a>3. 进行控制</h3><p>   录点完毕后，应首先确定机器人位于工作路径起始点附近。加下来就可以开始向导航器提交控制量和位姿数据，并接收规划控制量。已通过并超出感兴趣区域的位姿点将自动从工作路径中移除。</p>
+<p>   提交数据，接收指令：</p>
+   <figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> cmd = navigator(cmd, pose)</span><br></pre></td></tr></table></figure>
+<h3 id="4-调整参数"><a href="#4-调整参数" class="headerlink" title="4. 调整参数"></a>4. 调整参数</h3><p>   当前本模块包含两类可调整的参数：</p>
+<ul>
+<li><p>工作参数</p>
+<p>工作参数是路径规划过程中使用的参数，包括感兴趣区域、速度和加速度约束以及控制量采样点数量等，现已收纳到 <code>Configuration</code> 数据结构，在导航器构造时通过构造器或 DSL 指定。</p>
+</li>
+<li><p>优化参数</p>
+<p>优化参数是选择最优路径的标准，现包含终端位置、终端方向、全程贴合性和速度四项，已收纳到 <code>Conditions.kt</code> 中：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> conditions = setOf(</span><br><span class="line">	<span class="comment">//终端位置条件</span></span><br><span class="line">	Condition(<span class="number">1.0</span>) &#123; local, _, trajectory -&gt;</span><br><span class="line">		local.nodes.last() euclid trajectory.nodes.last()</span><br><span class="line">	&#125;,</span><br><span class="line">	<span class="comment">//终端方向条件</span></span><br><span class="line">	Condition(<span class="number">1.0</span>) &#123; local, _, trajectory -&gt;</span><br><span class="line">		(local.nodes.last() deflectionTo trajectory.nodes.last()).absoluteValue</span><br><span class="line">	&#125;,</span><br><span class="line">	<span class="comment">//全程贴合性条件</span></span><br><span class="line">	Condition(<span class="number">1.5</span>) &#123; local, _, trajectory -&gt;</span><br><span class="line">		trajectory</span><br><span class="line">			.nodes</span><br><span class="line">			.map &#123; pathNode -&gt; pathNode.position &#125;</span><br><span class="line">			.sumByDouble &#123; point -&gt;</span><br><span class="line">				local.segments.map &#123; </span><br><span class="line">                    segment -&gt; segment.distanceTo(point) </span><br><span class="line">                &#125;.min()!!</span><br><span class="line">			&#125;</span><br><span class="line">	&#125;,</span><br><span class="line">	<span class="comment">//线速度条件</span></span><br><span class="line">	Condition(<span class="number">1.0</span>) &#123; _, speed, _ -&gt;</span><br><span class="line">		log2(speed.first.absoluteValue + speed.second.absoluteValue)</span><br><span class="line">	&#125;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>条件 <code>Condition</code> 类定义为：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Condition</span></span>(<span class="keyword">val</span> k: <span class="built_in">Double</span>, <span class="keyword">val</span> f: (Trajectory, Sample, Trajectory) -&gt; <span class="built_in">Double</span>)</span><br></pre></td></tr></table></figure>
+<p>即优化函数和系数。</p>
+<p>开发者可以修改各项参数，也可以按照这个格式添加自己的优化条件。各优化条件将在最优化函数计算时自动归一化。</p>
+</li>
+</ul>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+    <div class="a2a_kit a2a_default_style">
+    <a class="a2a_dd" href="https://www.addtoany.com/share">Share</a>
+    <span class="a2a_divider"></span>
+    <!-- <a class="a2a_button_facebook"></a>
+    <a class="a2a_button_twitter"></a>
+    <a class="a2a_button_google_plus"></a>
+    <a class="a2a_button_pinterest"></a>
+    <a class="a2a_button_tumblr"></a> -->
+    <a class="a2a_button_wechat"></a>
+    <a class="a2a_button_sina_weibo"></a>
+</div>
+<script type="text/javascript" src="//static.addtoany.com/menu/page.js"></script>
+<style>
+    .a2a_menu {
+        border-radius: 4px;
+    }
+    .a2a_menu a {
+        margin: 2px 0;
+        font-size: 14px;
+        line-height: 16px;
+        border-radius: 4px;
+        color: inherit !important;
+        font-family: 'Microsoft Yahei';
+    }
+    #a2apage_dropdown {
+        margin: 10px 0;
+    }
+    .a2a_mini_services {
+        padding: 10px;
+    }
+    a.a2a_i,
+    i.a2a_i {
+        width: 122px;
+        line-height: 16px;
+    }
+    a.a2a_i .a2a_svg,
+    a.a2a_more .a2a_svg {
+        width: 16px;
+        height: 16px;
+        line-height: 16px;
+        vertical-align: top;
+        background-size: 16px;
+    }
+    a.a2a_i {
+        border: none !important;
+    }
+    a.a2a_menu_show_more_less {
+        margin: 0;
+        padding: 10px 0;
+        line-height: 16px;
+    }
+    .a2a_mini_services:after{content:".";display:block;height:0;clear:both;visibility:hidden}
+    .a2a_mini_services{*+height:1%;}
+</style>
+
+</div>
+
+            
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2018/09/12/programming/statemachine-2/" id="article-nav-newer" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">上一篇</strong>
+            <div class="article-nav-title">
+                
+                    状态机——(1)
+                
+            </div>
+        </a>
+    
+    
+        <a href="/2018/09/09/mechanical/season-analysis-2019-high-hanging/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">下一篇</strong>
+            <div class="article-nav-title">FTC 2019赛季任务分析及建议 高挂部分</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+
+</section>
+            
+                
+<aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="no-thumbnail">
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/8102/01/01/others/hello-world/" class="title">MechDancer Team 1329</a></p>
+                            <p class="item-date"><time datetime="8102-01-01T00:00:00.000Z" itemprop="datePublished">8102-01-01</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/技术文档（软件）/">技术文档（软件）</a></p>
+                            <p class="item-title"><a href="/2018/11/12/programming/scanning-digit-comment-DFA/" class="title">确定性有穷自动机实现单词、数字和注释扫描</a></p>
+                            <p class="item-date"><time datetime="2018-11-12T00:00:00.000Z" itemprop="datePublished">2018-11-12</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/简报-总结/">简报/总结</a></p>
+                            <p class="item-title"><a href="/2018/09/16/briefing/communication-defy-2018.09.16/" class="title">师大二附交流活动简报</a></p>
+                            <p class="item-date"><time datetime="2018-09-16T16:00:00.000Z" itemprop="datePublished">2018-09-16</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/技术文档（软件）/">技术文档（软件）</a></p>
+                            <p class="item-title"><a href="/2018/09/14/programming/navigation-interface/" class="title">规范导航器接口</a></p>
+                            <p class="item-date"><time datetime="2018-09-14T18:01:00.000Z" itemprop="datePublished">2018-09-14</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/技术文档（软件）/">技术文档（软件）</a></p>
+                            <p class="item-title"><a href="/2018/09/12/programming/statemachine-2/" class="title">状态机——(1)</a></p>
+                            <p class="item-date"><time datetime="2018-09-12T17:43:00.000Z" itemprop="datePublished">2018-09-12</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/技术文档（机械）/">技术文档（机械）</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术文档（软件）/">技术文档（软件）</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/简报-总结/">简报/总结</a><span class="category-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/8102/01/">一月 8102</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">九月 2018</a><span class="archive-list-count">6</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">标签</h3>
+        <div class="widget">
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/交流活动/">交流活动</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/任务分析/">任务分析</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/状态机/">状态机</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/编译原理/">编译原理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计建议/">设计建议</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/路径规划/">路径规划</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/造轮子/">造轮子</a><span class="tag-list-count">4</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">标签云</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/交流活动/" style="font-size: 10px;">交流活动</a> <a href="/tags/任务分析/" style="font-size: 13.33px;">任务分析</a> <a href="/tags/状态机/" style="font-size: 13.33px;">状态机</a> <a href="/tags/算法/" style="font-size: 16.67px;">算法</a> <a href="/tags/编译原理/" style="font-size: 10px;">编译原理</a> <a href="/tags/设计建议/" style="font-size: 10px;">设计建议</a> <a href="/tags/路径规划/" style="font-size: 13.33px;">路径规划</a> <a href="/tags/造轮子/" style="font-size: 20px;">造轮子</a>
+        </div>
+    </div>
+
+    
+    <div id="toTop" class="fas fa-angle-up"></div>
+</aside>
+
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2019 MechDancer<br>
+            <!-- Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="http://github.com/ppoffice">PPOffice</a> -->
+        </div>
+    </div>
+</footer>
+        
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+        <script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    
+    
+        <script type="text/x-mathjax-config">
+            MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] } });
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>

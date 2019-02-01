@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+    
+    <title>状态机——(1) | MechDancer - 机械舞者</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="前言本周 状态机实现库 有两大变化：  状态机各部分功能抽象为接口 添加或修改以下功能： 状态机允许初始状态悬空和修改初始状态 添加线性状态机构建工具 添加看门狗工具    本文主要介绍新功能的使用。 新功能使用说明构建线性状态机所谓线性状态机指的是状态有顺序并基于执行次数或外部条件按顺序调度的一类状态机。其本质与其他可执行后可自动跳转的状态机并无不同，因此库只需提供一个方便的构建器即可。 当前提">
+<meta name="keywords" content="造轮子,状态机">
+<meta property="og:type" content="article">
+<meta property="og:title" content="状态机——(1)">
+<meta property="og:url" content="http://mechdancer.org/2018/09/12/programming/statemachine-2/index.html">
+<meta property="og:site_name" content="MechDancer - 机械舞者">
+<meta property="og:description" content="前言本周 状态机实现库 有两大变化：  状态机各部分功能抽象为接口 添加或修改以下功能： 状态机允许初始状态悬空和修改初始状态 添加线性状态机构建工具 添加看门狗工具    本文主要介绍新功能的使用。 新功能使用说明构建线性状态机所谓线性状态机指的是状态有顺序并基于执行次数或外部条件按顺序调度的一类状态机。其本质与其他可执行后可自动跳转的状态机并无不同，因此库只需提供一个方便的构建器即可。 当前提">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://mechdancer.org/images/statemachine-2-class_diagram.png">
+<meta property="og:updated_time" content="2019-02-01T03:39:37.045Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="状态机——(1)">
+<meta name="twitter:description" content="前言本周 状态机实现库 有两大变化：  状态机各部分功能抽象为接口 添加或修改以下功能： 状态机允许初始状态悬空和修改初始状态 添加线性状态机构建工具 添加看门狗工具    本文主要介绍新功能的使用。 新功能使用说明构建线性状态机所谓线性状态机指的是状态有顺序并基于执行次数或外部条件按顺序调度的一类状态机。其本质与其他可执行后可自动跳转的状态机并无不同，因此库只需提供一个方便的构建器即可。 当前提">
+<meta name="twitter:image" content="http://mechdancer.org/images/statemachine-2-class_diagram.png">
+    
+
+    
+
+    
+        <link rel="icon" href="/css/images/favicon.png">
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-brands.min.css">
+    <link rel="stylesheet" href="/libs/font-awesome5/css/fa-solid.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+        <link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+    
+    
+    
+    
+
+
+</head>
+</html>
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">MechDancer - 机械舞者</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">主页</a>
+                
+                    <a class="main-nav-link" href="/archives">归档</a>
+                
+                    <a class="main-nav-link" href="/categories">分类</a>
+                
+                    <a class="main-nav-link" href="/tags">标签</a>
+                
+                    <a class="main-nav-link" href="/about">关于</a>
+                
+            </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索">
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么...">
+            <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">主页</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">归档</a></td>
+                
+                    <td><a class="main-nav-link" href="/categories">分类</a></td>
+                
+                    <td><a class="main-nav-link" href="/tags">标签</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">关于</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索">
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+            <section id="main"><article id="post-programming/statemachine-2" class="article article-type-post" itemscope="" itemprop="blogPost">
+
+    <!-- <script>
+        function scalingBanner(obj){
+            var $this=obj
+
+            var imgWidth=$this.width();
+            var imgHeight=$this.height();
+        
+            var result=scalingImage(imgWidth,imgHeight,300,300)
+            
+            $this.attr('width',result.width)
+            $this.attr('height',result.height)
+        }
+
+        function scalingImage(imgWidth, imgHeight, containerWidth, containerHeight) {
+            var containerRatio = containerWidth / containerHeight;
+            var imgRatio = imgWidth / imgHeight;
+        
+            if (imgRatio > containerRatio) {
+                imgWidth = containerWidth;
+                imgHeight = containerWidth / imgRatio;
+            } else if (imgRatio < containerRatio) {
+                imgHeight = containerHeight;
+                imgWidth = containerHeight * imgRatio;
+            } else {
+                imgWidth = containerWidth;
+                imgHeight = containerHeight;
+            }
+        
+            return { width: imgWidth, height: imgHeight };
+        }
+
+    </script>
+
+    <div style="display:none">
+        <img src="" width="300" height="300">
+        <img src="" onload="scalingBanner(this)" width="" height="">
+    </div> 
+ -->
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            状态机——(1)
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fas fa-calendar-alt"></i>
+        <a href="/2018/09/12/programming/statemachine-2/">
+            <time datetime="2018-09-12T17:43:00.000Z" itemprop="datePublished">2018-09-12</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fas fa-folder"></i>
+        <a class="article-category-link" href="/categories/技术文档（软件）/">技术文档（软件）</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/状态机/">状态机</a>, <a class="tag-link" href="/tags/造轮子/">造轮子</a>
+    </div>
+
+                        
+    <div>
+        <i class="fas fa-pencil-alt"></i>
+        Ydr
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本周 <a href="https://github.com/MechDancer/statemachine" target="_blank" rel="noopener">状态机实现库</a> 有两大变化：</p>
+<ul>
+<li>状态机各部分功能抽象为接口</li>
+<li>添加或修改以下功能：<ul>
+<li>状态机允许初始状态悬空和修改初始状态</li>
+<li>添加线性状态机构建工具</li>
+<li>添加看门狗工具</li>
+</ul>
+</li>
+</ul>
+<p>本文主要介绍新功能的使用。</p>
+<h3 id="新功能使用说明"><a href="#新功能使用说明" class="headerlink" title="新功能使用说明"></a>新功能使用说明</h3><h4 id="构建线性状态机"><a href="#构建线性状态机" class="headerlink" title="构建线性状态机"></a>构建线性状态机</h4><p>所谓线性状态机指的是状态有顺序并基于执行次数或外部条件按顺序调度的一类状态机。其本质与其他可执行后可自动跳转的状态机并无不同，因此库只需提供一个方便的构建器即可。</p>
+<p>当前提供的 DSL 构建器：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> `<span class="keyword">for</span>` = linearStateMachine &#123;</span><br><span class="line">		<span class="keyword">var</span> i = <span class="number">0</span></span><br><span class="line">		once &#123; i = <span class="number">0</span> &#125;</span><br><span class="line">		call(<span class="number">20</span>) &#123; println(++i) &#125;</span><br><span class="line">		delay &#123; time = <span class="number">1</span>; unit = SECONDS &#125;</span><br><span class="line">		once &#123; println(<span class="string">"hello world!"</span>) &#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p><code>once</code> 指定的代码块将执行 1 次。可以通过 <code>call</code> 设置代码块的执行次数。还可以通过 <code>forever</code> 设置代码块无限循环（可以通过看门狗退出）。<code>delay</code> 用于在两个状态之间制造间隔。</p>
+<p>状态指定的顺序就是状态执行的顺序。<code>reset</code> 可要求状态机回到初始状态，初始状态是无法修改的。</p>
+<h4 id="看门狗"><a href="#看门狗" class="headerlink" title="看门狗"></a>看门狗</h4><p>有时状态执行较慢，或者状态的离开条件因为某些原因迟迟无法满足，我们希望状态机在最终无望转移时仍能继续执行下去，此时可以使用看门狗。构造看门狗时需要指定看门狗作用的状态机、其起始状态、目标状态和等待的时间。当调用看门狗的 <code>start</code> 方法后，看门狗将启动。当等待时间消耗殆尽，状态机会启动一次检查，如果当前状态是指定的起始状态，环境有满足目标状态的进入条件，就不再检查起始状态的离开条件，直接驱动一次跳转。</p>
+<p>由于其强制跳转操作依赖于状态机的支持，看门狗作用的状态机必须实现 <code>IExternalTransferable&lt;T&gt;</code>。</p>
+<p>示例代码：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> <span class="keyword">init</span> = state &#123;</span><br><span class="line">			<span class="keyword">val</span> dog = Watchdog(<span class="keyword">this</span><span class="symbol">@stateMachine</span>, <span class="literal">null</span>, <span class="literal">null</span>, <span class="number">5</span>, SECONDS)</span><br><span class="line">			before = &#123; dog.start(); ACCEPT &#125;</span><br><span class="line">			doing = &#123; i = <span class="number">0</span> &#125;</span><br><span class="line">		&#125;</span><br></pre></td></tr></table></figure>
+<p>此状态机将在 <code>init</code> 状态初次执行 5s 后直接结束。</p>
+<h3 id="状态机接口"><a href="#状态机接口" class="headerlink" title="状态机接口"></a>状态机接口</h3><p>这一部分不详述，有兴趣可看类图：</p>
+<p><img src="/../images/statemachine-2-class_diagram.png" alt="class diagram"></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+    <div class="a2a_kit a2a_default_style">
+    <a class="a2a_dd" href="https://www.addtoany.com/share">Share</a>
+    <span class="a2a_divider"></span>
+    <!-- <a class="a2a_button_facebook"></a>
+    <a class="a2a_button_twitter"></a>
+    <a class="a2a_button_google_plus"></a>
+    <a class="a2a_button_pinterest"></a>
+    <a class="a2a_button_tumblr"></a> -->
+    <a class="a2a_button_wechat"></a>
+    <a class="a2a_button_sina_weibo"></a>
+</div>
+<script type="text/javascript" src="//static.addtoany.com/menu/page.js"></script>
+<style>
+    .a2a_menu {
+        border-radius: 4px;
+    }
+    .a2a_menu a {
+        margin: 2px 0;
+        font-size: 14px;
+        line-height: 16px;
+        border-radius: 4px;
+        color: inherit !important;
+        font-family: 'Microsoft Yahei';
+    }
+    #a2apage_dropdown {
+        margin: 10px 0;
+    }
+    .a2a_mini_services {
+        padding: 10px;
+    }
+    a.a2a_i,
+    i.a2a_i {
+        width: 122px;
+        line-height: 16px;
+    }
+    a.a2a_i .a2a_svg,
+    a.a2a_more .a2a_svg {
+        width: 16px;
+        height: 16px;
+        line-height: 16px;
+        vertical-align: top;
+        background-size: 16px;
+    }
+    a.a2a_i {
+        border: none !important;
+    }
+    a.a2a_menu_show_more_less {
+        margin: 0;
+        padding: 10px 0;
+        line-height: 16px;
+    }
+    .a2a_mini_services:after{content:".";display:block;height:0;clear:both;visibility:hidden}
+    .a2a_mini_services{*+height:1%;}
+</style>
+
+</div>
+
+            
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2018/09/14/programming/navigation-interface/" id="article-nav-newer" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">上一篇</strong>
+            <div class="article-nav-title">
+                
+                    规范导航器接口
+                
+            </div>
+        </a>
+    
+    
+        <a href="/2018/09/12/programming/navigation.dwa/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">下一篇</strong>
+            <div class="article-nav-title">速度窗口法实现局部路径规划</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+
+</section>
+            
+                
+<aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="no-thumbnail">
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/8102/01/01/others/hello-world/" class="title">MechDancer Team 1329</a></p>
+                            <p class="item-date"><time datetime="8102-01-01T00:00:00.000Z" itemprop="datePublished">8102-01-01</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/技术文档（软件）/">技术文档（软件）</a></p>
+                            <p class="item-title"><a href="/2018/11/12/programming/scanning-digit-comment-DFA/" class="title">确定性有穷自动机实现单词、数字和注释扫描</a></p>
+                            <p class="item-date"><time datetime="2018-11-12T00:00:00.000Z" itemprop="datePublished">2018-11-12</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/简报-总结/">简报/总结</a></p>
+                            <p class="item-title"><a href="/2018/09/16/briefing/communication-defy-2018.09.16/" class="title">师大二附交流活动简报</a></p>
+                            <p class="item-date"><time datetime="2018-09-16T16:00:00.000Z" itemprop="datePublished">2018-09-16</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/技术文档（软件）/">技术文档（软件）</a></p>
+                            <p class="item-title"><a href="/2018/09/14/programming/navigation-interface/" class="title">规范导航器接口</a></p>
+                            <p class="item-date"><time datetime="2018-09-14T18:01:00.000Z" itemprop="datePublished">2018-09-14</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/技术文档（软件）/">技术文档（软件）</a></p>
+                            <p class="item-title"><a href="/2018/09/12/programming/statemachine-2/" class="title">状态机——(1)</a></p>
+                            <p class="item-date"><time datetime="2018-09-12T17:43:00.000Z" itemprop="datePublished">2018-09-12</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/技术文档（机械）/">技术文档（机械）</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术文档（软件）/">技术文档（软件）</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/简报-总结/">简报/总结</a><span class="category-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/8102/01/">一月 8102</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">九月 2018</a><span class="archive-list-count">6</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">标签</h3>
+        <div class="widget">
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/交流活动/">交流活动</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/任务分析/">任务分析</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/状态机/">状态机</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/编译原理/">编译原理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计建议/">设计建议</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/路径规划/">路径规划</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/造轮子/">造轮子</a><span class="tag-list-count">4</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">标签云</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/交流活动/" style="font-size: 10px;">交流活动</a> <a href="/tags/任务分析/" style="font-size: 13.33px;">任务分析</a> <a href="/tags/状态机/" style="font-size: 13.33px;">状态机</a> <a href="/tags/算法/" style="font-size: 16.67px;">算法</a> <a href="/tags/编译原理/" style="font-size: 10px;">编译原理</a> <a href="/tags/设计建议/" style="font-size: 10px;">设计建议</a> <a href="/tags/路径规划/" style="font-size: 13.33px;">路径规划</a> <a href="/tags/造轮子/" style="font-size: 20px;">造轮子</a>
+        </div>
+    </div>
+
+    
+    <div id="toTop" class="fas fa-angle-up"></div>
+</aside>
+
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2019 MechDancer<br>
+            <!-- Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="http://github.com/ppoffice">PPOffice</a> -->
+        </div>
+    </div>
+</footer>
+        
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+        <script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    
+    
+        <script type="text/x-mathjax-config">
+            MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] } });
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>
