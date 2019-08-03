@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh">
-<head><meta name="generator" content="Hexo 3.8.0">
+<head><meta name="generator" content="Hexo 3.9.0">
     <meta charset="utf-8">
     
     <title>规范导航器接口 | MechDancer - 机械舞者</title>
@@ -13,7 +13,7 @@
 <meta property="og:site_name" content="MechDancer - 机械舞者">
 <meta property="og:description" content="前言通过前一段时间实现的动态窗口法导航，我对导航模块也有了更深一层的认识。为了使软硬件异构的机器人都能使用导航模块，我抽象出了导航模块，以及可导航运动平台的共性，其实现即规范导航器接口。本文主要介绍导航器的模型和概念，并辅以少量演示代码。 下文中“导航”与“局部路径规划”是等价的，可互换。 概念以动态窗口法和定时弹带法为代表的一系列导航算法具有相同的运行过程，即预测→优化→控制。其中预测过程确定有">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-02-01T03:39:37.045Z">
+<meta property="og:updated_time" content="2019-08-03T12:42:53.412Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="规范导航器接口">
 <meta name="twitter:description" content="前言通过前一段时间实现的动态窗口法导航，我对导航模块也有了更深一层的认识。为了使软硬件异构的机器人都能使用导航模块，我抽象出了导航模块，以及可导航运动平台的共性，其实现即规范导航器接口。本文主要介绍导航器的模型和概念，并辅以少量演示代码。 下文中“导航”与“局部路径规划”是等价的，可互换。 概念以动态窗口法和定时弹带法为代表的一系列导航算法具有相同的运行过程，即预测→优化→控制。其中预测过程确定有">
@@ -74,14 +74,14 @@
             <div id="search-form-wrap">
 
     <form class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="搜索">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
         <button type="submit" class="search-form-submit"></button>
     </form>
     <div class="ins-search">
     <div class="ins-search-mask"></div>
     <div class="ins-search-container">
         <div class="ins-input-wrapper">
-            <input type="text" class="ins-search-input" placeholder="想要查找什么...">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
             <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
         </div>
         <div class="ins-section-wrapper">
@@ -127,7 +127,7 @@
                 <td>
                     
     <div class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="搜索">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
     </div>
 
                 </td>
@@ -138,7 +138,7 @@
 
         <div class="outer">
             
-            <section id="main"><article id="post-programming/navigation-interface" class="article article-type-post" itemscope="" itemprop="blogPost">
+            <section id="main"><article id="post-programming/navigation-interface" class="article article-type-post" itemscope itemprop="blogPost">
 
     <!-- <script>
         function scalingBanner(obj){

@@ -1,3 +1,3 @@
 # MechDancer 网站
 
-http://mechdancer.org
+欢迎访问 https://mechdancer.org

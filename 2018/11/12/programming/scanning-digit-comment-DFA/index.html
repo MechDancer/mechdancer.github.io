@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh">
-<head><meta name="generator" content="Hexo 3.8.0">
+<head><meta name="generator" content="Hexo 3.9.0">
     <meta charset="utf-8">
     
     <title>确定性有穷自动机实现单词、数字和注释扫描 | MechDancer - 机械舞者</title>
@@ -14,7 +14,7 @@
 <meta property="og:description" content="介绍通过将整段的字符串结成单词，扫描器 可以显著简化语法分析的难度。而构造分词扫描器的通用方法就是使用 正则表达式 和 有穷自动机。有时设计一个新语言的第一步就是实现正则引擎，以便方便地测试词法分析，但是直接编码来产生自动机也是可行的，并且在词类较少时更方便调试和修改。  下面我们所说的 单词（token） 指的是一类具有特殊含义的字符串，为了与通常的单词（word）区分开，这种 单词 都使用粗体">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://mechdancer.org/images/scanning-digit-comment-DFA-DFA-digit.png">
-<meta property="og:updated_time" content="2019-02-01T03:39:37.045Z">
+<meta property="og:updated_time" content="2019-08-03T12:42:53.412Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="确定性有穷自动机实现单词、数字和注释扫描">
 <meta name="twitter:description" content="介绍通过将整段的字符串结成单词，扫描器 可以显著简化语法分析的难度。而构造分词扫描器的通用方法就是使用 正则表达式 和 有穷自动机。有时设计一个新语言的第一步就是实现正则引擎，以便方便地测试词法分析，但是直接编码来产生自动机也是可行的，并且在词类较少时更方便调试和修改。  下面我们所说的 单词（token） 指的是一类具有特殊含义的字符串，为了与通常的单词（word）区分开，这种 单词 都使用粗体">
@@ -76,14 +76,14 @@
             <div id="search-form-wrap">
 
     <form class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="搜索">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
         <button type="submit" class="search-form-submit"></button>
     </form>
     <div class="ins-search">
     <div class="ins-search-mask"></div>
     <div class="ins-search-container">
         <div class="ins-input-wrapper">
-            <input type="text" class="ins-search-input" placeholder="想要查找什么...">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
             <span class="ins-close ins-selectable"><i class="fas fa-times-circle"></i></span>
         </div>
         <div class="ins-section-wrapper">
@@ -129,7 +129,7 @@
                 <td>
                     
     <div class="search-form">
-        <input type="text" class="ins-search-input search-form-input" placeholder="搜索">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
     </div>
 
                 </td>
@@ -140,7 +140,7 @@
 
         <div class="outer">
             
-            <section id="main"><article id="post-programming/scanning-digit-comment-DFA" class="article article-type-post" itemscope="" itemprop="blogPost">
+            <section id="main"><article id="post-programming/scanning-digit-comment-DFA" class="article article-type-post" itemscope itemprop="blogPost">
 
     <!-- <script>
         function scalingBanner(obj){
@@ -184,7 +184,7 @@
         
             
 	
-		<img src="/../images/scanning-digit-comment-DFA-DFA-digit.png" class="article-banner">
+		<img src="/../images/scanning-digit-comment-DFA-DFA-digit.png" class="article-banner" />
 	
 
 
